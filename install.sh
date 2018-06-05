@@ -342,6 +342,8 @@ done
 WALLET_PASS_FINAL=$WALLET_PASS
 step "Criando a Wallet para o Node...."
 try wallet_pass
+try mkdir /home/lunesuser/lunesblockchain/wallet
+try mv /tmp/wallet/wallet.dat /home/lunesuser/lunesblockchain/wallet/
 next
 
 step "Configurando /etc/lunesnode/lunes.conf...."
