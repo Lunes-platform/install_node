@@ -342,7 +342,7 @@ done
 WALLET_PASS_FINAL=$WALLET_PASS
 step "Criando a Wallet para o Node...."
 try wallet_pass
-try mkdir /home/lunesuser/lunesblockchain/wallet
+try mkdir -p /home/lunesuser/lunesblockchain/wallet
 try mv /tmp/wallet/wallet.dat /home/lunesuser/lunesblockchain/wallet/
 next
 
@@ -387,7 +387,7 @@ get_data seed_hash
 try sed -i "s/WALLET_SEED/$VALOR_FINAL/g" /tmp/node/lunes.conf
 next
 mv /tmp/node/lunes.conf /etc/lunesnode/lunes.conf
-
+chown -R lunesuser.lunesuser /home/lunesuser/
 echo -e "\e[92m"
 echo "  _____ _   _  _____ _______       _               _____   /\/|  ____  ";
 echo " |_   _| \ | |/ ____|__   __|/\   | |        /\   / ____| |/\/  / __ \ ";
