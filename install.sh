@@ -408,7 +408,7 @@ echo -e "\e[97m"
 
 echo "Próximos passos: "
 echo " - em /tmp/wallet há um arquivo chamado SENHAS.TXT"
-echo "   Guardeo com sua vida!!!!!"
+echo "   Guarde-o com sua vida!!!!!"
 echo ""
 echo "Comandos Básicos:"
 echo " - Para iniciar o node: systemctl start lunesnode"
