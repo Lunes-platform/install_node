@@ -26,6 +26,16 @@ clear
 [ ! -d /etc/lunesnode ] && mkdir /etc/lunesnode
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+which yum &> /dev/null
+rc=$?
+if [[ $rc != 0 ]]; then
+    PKG="$(which apt) -qq --yes"
+     SO=ubuntu
+else
+    PKG="$(which yum) -q -y"
+     so=centos
+fi
+
 APT=$(which apt)
 CAT=$(which cat)
 AWK=$(which awk)
@@ -277,14 +287,18 @@ next
 
 # Atualizando pacotes
 step "Atualizando pacotes do Sistema Operacional..."
-try $APT -qq --yes update &> /dev/null
-try $APT -qq --yes upgrade &> /dev/null
-try $APT -qq --yes autoremove &> /dev/null
+try $PKG update &> /dev/null
+try $PKG upgrade &> /dev/null
 next
 
 # Instalando dependencia
 step "Instalando OpenJDK8...."
-try $APT -qq --yes install openjdk-8-jre &> /dev/null
+if [[ $SO != "ubuntu" ]]; then
+    JRE=java-1.8.0-openjdk
+else
+    JRE=openjdk-8-jre
+fi
+try $PKG install $JRE &> /dev/null
 next 
 
 # Criação do usuário lunesuser
