@@ -289,6 +289,8 @@ next
 step "Atualizando pacotes do Sistema Operacional..."
 try $PKG update &> /dev/null
 try $PKG upgrade &> /dev/null
+try $PKG install wget &> /dev/null
+try $PKG install git &> /dev/null
 next
 
 # Instalando dependencia
