@@ -363,7 +363,7 @@ next
 step "Configurando /etc/lunesnode/lunes.conf...."
 mkdir /tmp/node
 cd /tmp/node
-try $WGET --no-cache "${lunesnode_git}/lunes.conf"  &> /dev/null
+try $WGET --no-cache "${lunesnode_git}/lunes_mainnet.conf"  &> /dev/null
 next
 
 # Verifica IP e node do Node
@@ -385,6 +385,7 @@ IPV4_FINAL=$IPV4
 echo ""
 echo ""
 step "Incluindo NODE_NAME no lunes.conf...."
+mv /tmp/node/lunes_mainnet.conf /tmp/node/lunes.conf
 try sed -i s/NODE_NAME/$NODE_NAME_FINAL/g /tmp/node/lunes.conf
 next
 
