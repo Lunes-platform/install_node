@@ -41,7 +41,7 @@ CAT=$(which cat)
 AWK=$(which awk)
 CURL=$(which curl)               
 WGET=$(which wget)
-lunesnode_url="https://lunes.io/install/"
+lunesnode_url="https://github.com/Lunes-platform/"
 lunesnode_git="https://raw.githubusercontent.com/Lunes-platform/install_node/master/"
 
 # ----> Inicio das Funcoes
@@ -328,12 +328,12 @@ next
 # Download dos pacotes do LunesNode
 cd /opt/lunesnode
 step "Baixando LunesNode....."
-try $WGET --no-cache "${lunesnode_url}/lunesnode-latest.jar"  &> /dev/null
+try $WGET --no-cache "${lunesnode_url}/LunesNode/releases/download/0.0.7/lunesnode-latest.jar"  &> /dev/null
 next
 
 step "Baixando Wallet Generator...."
 cd /opt/lunesnode
-try $WGET --no-cache "${lunesnode_url}/walletgenerator.jar"  &> /dev/null
+try $WGET --no-cache "${lunesnode_url}/WalletGenerator/releases/download/0.0.1/walletgenerator.jar"  &> /dev/null
 next
 
 # Criando o serviço
