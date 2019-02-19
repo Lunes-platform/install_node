@@ -14,7 +14,6 @@
 # Usage: 
 #  $./install_node.sh <mainnet|testnet> <enter>
 #
-# Created by Daniel Checchia on 03/06/2018
 # Copyright (c) 2018 Lunes Platform.
 #
 
