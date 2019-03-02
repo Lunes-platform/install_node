@@ -190,8 +190,10 @@ md5_check () {
 
 wallet_pass () {
     mkdir -p /tmp/wallet
-    /usr/bin/java -jar /opt/lunesnode/walletgenerator.jar -p $WALLET_PASS > /tmp/wallet/SENHAS.TXT 
-    echo $WALLET_PASS >> /tmp/wallet/SENHAS.TXT 
+    cd /tmp/wallet
+    /usr/bin/java -jar $walletgenerator_bin -p $WALLET_PASS > /tmp/wallet/SENHAS.TXT 
+    echo $WALLET_PASS >> /tmp/wallet/SENHAS.TXT
+    cd - 
 }
 
 create_init () {
