@@ -190,9 +190,8 @@ md5_check () {
 
 wallet_pass () {
     mkdir -p /tmp/wallet
-    cd /tmp/wallet    
-    /usr/bin/java -jar /opt/lunesnode/walletgenerator.jar -p $WALLET_PASS > SENHAS.TXT
-    echo $WALLET_PASS >> SENHAS.TXT
+    /usr/bin/java -jar /opt/lunesnode/walletgenerator.jar -p $WALLET_PASS > /tmp/wallet/SENHAS.TXT 
+    echo $WALLET_PASS >> /tmp/wallet/SENHAS.TXT 
 }
 
 create_init () {
@@ -253,7 +252,7 @@ echo "                                             ";
 echo "                                             ";
 echo -e "\e[97m"
 echo " "
-echo " - Script de instalação/atualização do Lunes Node - Ubuntu 16.04"
+echo " - Script de instalação/atualização do Lunes Node - Ubuntu 18.04/16.04"
 echo " "
 echo " Este script irá realizar as seguintes configurações em seu node:"
 echo " "
@@ -360,7 +359,6 @@ next
 
 step "Configurando /etc/lunesnode/lunes.conf...."
 mkdir /tmp/node
-cd /tmp/node
 try cp lunes_mainnet.conf /tmp/node/lunes.conf
 next
 
