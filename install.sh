@@ -297,6 +297,24 @@ step "Comparando MD5...."
 try md5_check
 next
 
+
+# Verifica IP e node do Node
+my_ip
+echo ""
+echo ""
+echo "Dados encontrados: "
+echo "    NODE: " $NODE_NAME
+echo "    IPv4: " $IPV4
+echo ""
+read -p "Estes são os dados de seu node ? <S/n> " -n 1 -r
+if [[ ! $REPLY =~ ^[YySs]$ ]]
+then
+   echo "Corrija os dados de seu DNS e tente novamente :-) "
+   exit 1
+fi
+NODE_NAME_FINAL=$NODE_NAME
+IPV4_FINAL=$IPV4
+
 # Instalando dependencia
 step "Instalando OpenJDK8...."
 if [[ $SO != "ubuntu" ]]; then
@@ -362,22 +380,6 @@ mkdir /tmp/node
 try cp lunes_mainnet.conf /tmp/node/lunes.conf
 next
 
-# Verifica IP e node do Node
-my_ip
-echo ""
-echo ""
-echo "Dados encontrados: "
-echo "    NODE: " $NODE_NAME
-echo "    IPv4: " $IPV4
-echo ""
-read -p "Estes são os dados de seu node ? <S/n> " -n 1 -r
-if [[ ! $REPLY =~ ^[YySs]$ ]]
-then
-    echo "Corrija os dados de seu DNS e tente novamente :-) "
-    exit 1
-fi
-NODE_NAME_FINAL=$NODE_NAME
-IPV4_FINAL=$IPV4
 echo ""
 echo ""
 step "Incluindo NODE_NAME no lunes.conf...."
@@ -393,7 +395,7 @@ try sed -i "s/WALLET_PASS/$WALLET_PASS_FINAL/g" /tmp/node/lunes.conf
 next
 
 step "Incluindo seu SEED no lunes.conf ....."
-get_data seed_hash
+VALOR_FINAL=`grep "seed_hash" /tmp/wallet/SENHAS.TXT | awk  -F':' '{ print $2}' `
 try sed -i "s/WALLET_SEED/$VALOR_FINAL/g" /tmp/node/lunes.conf
 next
 mv /tmp/node/lunes.conf /etc/lunesnode/lunes.conf
