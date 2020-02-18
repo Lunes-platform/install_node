@@ -9,7 +9,7 @@
 #
 #
 # install_node.sh
-# Description: Lunes Node install script
+# Descrição: Script de instalação do Lunes Node
 #
 # Usage: 
 #  $./install_node.sh <mainnet|testnet> <enter>
@@ -168,7 +168,7 @@ md5_check () {
     if [[ "$LOCAL_MD5" != "$REMOTE_MD5" ]]; then 
        return 
     else 
-       echo "Node version is outdated."
+       echo "Versão do Node está atualizada!"
        exit 100
     fi
 }
@@ -246,23 +246,23 @@ echo "                                             ";
 echo "                                             ";
 echo -e "\e[97m"
 echo " "
-echo " Lunes Node install script"
+echo " - Script de instalação/atualização do Lunes Node - Ubuntu 16.04"
 echo " "
-echo " The script will perform the following settings at this node:"
+echo " Este script irá realizar as seguintes configurações em seu node:"
 echo " "
-echo " 	* Update system packages"
-echo " 	* create user lunesuser"
-echo " 	* Download lunesnode.jar and github release utility software"
-echo " 	* Make /opt/lunesnode and install lunesnode"
-echo " 	* Make /etc/lunesnode and setup lunes.conf"
-echo " 	* Make bootstrap script /etc/systemd/system/lunesnode.service"
-echo " 	* Create your Wallet and SEED words"
-echo " 	* Tell you about basic LunesNode commands."
+echo " 	* Atualizar os pacotes"
+echo " 	* criar usuário lunesuser"
+echo " 	* Baixar o LunesNode.jar e utilitários do github release"
+echo " 	* Criar /opt/lunesnode e instalar o lunesnode"
+echo " 	* Criar /etc/lunesnode e colocar o lunes.conf"
+echo " 	* Criar o script de inicialização /etc/systemd/system/lunesnode.service"
+echo " 	* Criar sua Wallet e os SEEDs"
+echo " 	* Instruir os comandos básicos do Node."
 echo " "
-echo "*** Please, run this script as root or sudo bash! ***"
+echo "*** Este script deve ser rodado como root ou sudo bash! ***"
 echo " "
 
-read -p "Do you wish to proceed with install? <Y/n> " -n 1 -r
+read -p "Certeza que deseja continuar a Instalação? <S/n> " -n 1 -r
 
 
 if [[ ! $REPLY =~ ^[YySs]$ ]]
@@ -274,18 +274,18 @@ fi
 echo ""
 
 # Valida root
-step "Checking for root permissions..."
+step "Validando Root..."
 try is_root
 next
 
 # Validando necessidade de atualizacao LunesNode
-step "Checking MD5 sum...."
+step "Comparando MD5...."
 try md5_check
 next
 
 
 # Atualizando pacotes
-step "Updating your OS..."
+step "Atualizando pacotes do Sistema Operacional..."
 try $PKG update &> /dev/null
 try $PKG upgrade &> /dev/null
 try $PKG install wget &> /dev/null
@@ -293,7 +293,7 @@ try $PKG install git &> /dev/null
 next
 
 # Instalando dependencia
-step "Installing OpenJDK8...."
+step "Instalando OpenJDK8...."
 if [[ $SO != "ubuntu" ]]; then
     JRE=java-1.8.0-openjdk
 else
@@ -306,7 +306,7 @@ next
 # Captura da Senha da Wallet"
 echo ""
 echo ""
-echo -n "Please, set a password for lunesuser: ";
+echo -n "Digite a senha para o usuário lunesuser: ";
 unset LUNESUSER;
 while IFS= read -r -s -n1 pass; do
   if [[ -z $pass ]]; then
@@ -319,31 +319,31 @@ while IFS= read -r -s -n1 pass; do
 done
 
 
-step "Making lunesuser....."
+step "Criando usuário lunesuser....."
 try /usr/sbin/adduser lunesuser --gecos "Lunes User,,," --disabled-password &> /dev/null
 try echo "lunesuser:$LUNESUSER" | /usr/bin/sudo chpasswd
 next
 
 # Download dos pacotes do LunesNode
 cd /opt/lunesnode
-step "Downloading LunesNode....."
+step "Baixando LunesNode....."
 try $WGET --no-cache "${lunesnode_url}/LunesNode/releases/download/0.0.7/lunesnode-latest.jar"  &> /dev/null
 next
 
-step "Downloading Wallet Generator...."
+step "Baixando Wallet Generator...."
 cd /opt/lunesnode
 try $WGET --no-cache "${lunesnode_url}/WalletGenerator/releases/download/0.0.1/walletgenerator.jar"  &> /dev/null
 next
 
 # Criando o serviço
-step "Setting up LunesNode service....."
+step "Criando o serviço LunesNode....."
 try create_init
 next
 
 # Captura da Senha da Wallet"
 echo ""
 echo ""
-echo -n "Setup a password for your Wallet: ";
+echo -n "Digite a senha para sua Wallet: ";
 unset WALLET_PASS;
 while IFS= read -r -s -n1 pass; do
   if [[ -z $pass ]]; then
@@ -355,48 +355,48 @@ while IFS= read -r -s -n1 pass; do
   fi
 done
 WALLET_PASS_FINAL=$WALLET_PASS
-step "Creating Wallet for LunesNode...."
+step "Criando a Wallet para o Node...."
 try wallet_pass
 next
 
-step "Setting up /etc/lunesnode/lunes-testnode.conf...."
+step "Configurando /etc/lunesnode/lunes.conf...."
 mkdir /tmp/node
 cd /tmp/node
-try $WGET --no-cache "${lunesnode_git}/lunes-testnet.conf"  &> /dev/null
+try $WGET --no-cache "${lunesnode_git}/lunes_mainnet.conf"  &> /dev/null
 next
 
 # Verifica IP e node do Node
 my_ip
 echo ""
 echo ""
-echo "Found network data: "
+echo "Dados encontrados: "
 echo "    NODE: " $NODE_NAME
 echo "    IPv4: " $IPV4
 echo ""
-read -p "Are those data correct? <Y/n> " -n 1 -r
+read -p "Estes são os dados de seu node ? <S/n> " -n 1 -r
 if [[ ! $REPLY =~ ^[YySs]$ ]]
 then
-    echo "Please, adjust you DNS data and try again."
+    echo "Corrija os dados de seu DNS e tente novamente :-) "
     exit 1
 fi
 NODE_NAME_FINAL=$NODE_NAME
 IPV4_FINAL=$IPV4
 echo ""
 echo ""
-step "Including NODE_NAME on lunes.conf...."
-mv /tmp/node/lunes-testnet.conf /tmp/node/lunes.conf
+step "Incluindo NODE_NAME no lunes.conf...."
+mv /tmp/node/lunes_mainnet.conf /tmp/node/lunes.conf
 try sed -i s/NODE_NAME/$NODE_NAME_FINAL/g /tmp/node/lunes.conf
 next
 
-step "Including IP on lunes.conf...."
+step "Incluindo IP lunes.conf...."
 try sed -i "s/IPV4/$IPV4_FINAL/g" /tmp/node/lunes.conf
 next
 
-step "Including Wallet password on lunes.conf....."
+step "Incluindo senha da Wallet no lunes.conf....."
 try sed -i "s/WALLET_PASS/$WALLET_PASS_FINAL/g" /tmp/node/lunes.conf
 next
 
-step "Including your SEED words on lunes.conf ....."
+step "Incluindo seu SEED no lunes.conf ....."
 get_data seed_hash
 try sed -i "s/WALLET_SEED/$VALOR_FINAL/g" /tmp/node/lunes.conf
 next
@@ -422,15 +422,15 @@ echo "                                                       ";
 echo "                                                       ";
 echo -e "\e[97m"
 
-echo "Next steps: "
-echo " - on /tmp/wallet there is a file named SENHAS.TXT"
-echo "   !!!!! KEEP IT !!!!!"
+echo "Próximos passos: "
+echo " - em /tmp/wallet há um arquivo chamado SENHAS.TXT"
+echo "   Guarde-o com sua vida!!!!!"
 echo ""
-echo "Basic Commands:"
-echo " - Start node: systemctl start lunesnode"
-echo " - Stop node: systemctl stop lunesnode"
-echo " - Get node status: systemctl status lunesnode"
+echo "Comandos Básicos:"
+echo " - Para iniciar o node: systemctl start lunesnode"
+echo " - Para parar o node: systemctl stop lunesnode"
+echo " - Para saber o status do node: systemctl status lunesnode"
 echo ""
-echo "and welcom to Lunes Platform!"
+echo "e seja bem-vindo à rede da Lunes Platform!"
 echo
 
