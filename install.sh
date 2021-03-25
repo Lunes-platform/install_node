@@ -41,7 +41,7 @@ AWK=$(which awk)
 CURL=$(which curl)               
 WGET=$(which wget)
 lunesnode_url="https://github.com/Lunes-platform/"
-lunesnode_git="https://raw.githubusercontent.com/Lunes-platform/install_node/master/"
+lunesnode_git="https://raw.githubusercontent.com/Lunes-platform/install_node/blockchain/update/"
 
 # ----> Inicio das Funcoes
 ID=$(/usr/bin/which id)
