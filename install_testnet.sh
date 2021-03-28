@@ -187,7 +187,7 @@ Description=Lunes Test Node Blockchain
 After=network.target
 [Service]
 WorkingDirectory=/opt/lunesnode/
-ExecStart=/usr/bin/java -jar /opt/lunesnode/lunesnode-latest.jar /etc/lunesnode/lunes_testnet.conf
+ExecStart=/usr/bin/java -jar /opt/lunesnode/LunesNode-test-release-0.1.2.jar /etc/lunesnode/lunes_testnet.conf
 LimitNOFILE=4096
 Type=simple
 User=lunesuser
@@ -280,8 +280,8 @@ next
 
 # Validando necessidade de atualizacao LunesNode
 step "Comparando MD5...."
-try md5_check
-next
+#try md5_check
+#next
 
 
 # Atualizando pacotes
