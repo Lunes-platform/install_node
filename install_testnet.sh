@@ -28,7 +28,7 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
 which yum &> /dev/null
 rc=$?
 if [[ $rc != 0 ]]; then
-    PKG="$(which apt) -qq --yes"
+    PKG="$(which apt-get) --yes"
      SO=ubuntu
 else
     PKG="$(which yum) -q -y"
@@ -286,10 +286,10 @@ step "Comparando MD5...."
 
 # Atualizando pacotes
 step "Atualizando pacotes do Sistema Operacional..."
-try $PKG update &> /dev/null
-try $PKG upgrade &> /dev/null
-try $PKG install wget &> /dev/null
-try $PKG install git &> /dev/null
+try $PKG update
+try $PKG upgrade
+try $PKG install wget
+try $PKG install git
 next
 
 # Instalando dependencia
@@ -384,7 +384,6 @@ IPV4_FINAL=$IPV4
 echo ""
 echo ""
 step "Incluindo NODE_NAME no lunes_testnet.conf...."
-mv /tmp/node/lunes_testnet.conf /tmp/node/lunes_testnet.conf
 try sed -i s/NODE_NAME/$NODE_NAME_FINAL/g /tmp/node/lunes_testnet.conf
 next
 
