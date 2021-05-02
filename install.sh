@@ -40,8 +40,12 @@ CAT=$(which cat)
 AWK=$(which awk)
 CURL=$(which curl)               
 WGET=$(which wget)
-lunesnode_url="https://github.com/Lunes-platform/"
-lunesnode_git="https://raw.githubusercontent.com/Lunes-platform/install_node/master/"
+lunesnode_bin="/opt/lunesnode/lunesnode-latest.jar"
+walletgenerator_bin="/opt/lunesnode/walletgenerator.jar"
+lunes_git="Lunes-platform"
+lunesnode_git="LunesNode"
+walletgenerator_git="WalletGenerator"
+lunesnode_md5="https://www.lunes.io/install/lunesnode-latest.md5"
 
 # ----> Inicio das Funcoes
 ID=$(/usr/bin/which id)
@@ -117,6 +121,13 @@ step() {
     [[ -w /tmp ]] && /bin/echo $STEP_OK > /tmp/step.$$
 }
 
+
+download_git() {
+   $CURL -s "https://api.github.com/repos/$lunes_git/$lunesnode_git/releases/latest" | grep 'browser_download_url' | sed -E 's/.*"([^"]+)".*/\1/' |  xargs $WGET -qO  $lunesnode_bin
+   $CURL -s "https://api.github.com/repos/$lunes_git/$walletgenerator_git/releases/latest" | grep 'browser_download_url' | sed -E 's/.*"([^"]+)".*/\1/' |  xargs $WGET -qO $walletgenerator_bin
+   $WGET -q --no-check-certificate ${lunesnode_md5} -O /opt/lunesnode/lunesnode-latest.md5
+}
+
 try() {
     # Check for `-b' argument to run command in the background.
     export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
@@ -159,25 +170,30 @@ next() {
 }
 
 md5_check () {
-    EXIT_MD5=0
-    if [ ! -f /opt/lunesnode/lunesnode-latest.md5 ]; then
-        echo "181818181" > /opt/lunesnode/lunesnode-latest.md5
+    if [ ! -f $lunesnode_bin ]; then
+        return
     fi
     LOCAL_MD5=$($CAT /opt/lunesnode/lunesnode-latest.md5 | $AWK '{ print $1 }' )
-    REMOTE_MD5=$($CURL -s https://lunes.io/install/lunesnode-latest.md5 | $AWK '{ print $1 }' )
+    REMOTE_MD5=$($CURL -ks ${lunesnode_md5} | $AWK '{ print $1 }' )
     if [[ "$LOCAL_MD5" != "$REMOTE_MD5" ]]; then 
-       return 
-    else 
-       echo "Versão do Node está atualizada!"
-       exit 100
+       systemctl stop lunesnode
+       echo "Update new version..."
+       try download_git
+       cd /home/lunesuser
+       rm -f lunesblockchain/data/*
+       systemctl start lunesnode
+       echo -e "Done."
     fi
+    echo -e  "Versão do Node está atualizada!"
+    exit 100
 }
 
 wallet_pass () {
     mkdir -p /tmp/wallet
-    cd /tmp/wallet    
-    /usr/bin/java -jar /opt/lunesnode/walletgenerator.jar -p $WALLET_PASS > SENHAS.TXT
-    echo $WALLET_PASS >> SENHAS.TXT
+    cd /tmp/wallet
+    /usr/bin/java -jar $walletgenerator_bin -p $WALLET_PASS > /tmp/wallet/SENHAS.TXT 
+    echo $WALLET_PASS >> /tmp/wallet/SENHAS.TXT
+    cd - 
 }
 
 create_init () {
@@ -219,14 +235,6 @@ while read line
 done < /tmp/wallet/SENHAS.TXT
 }
 
-install_or_update () {
-    # Valida diretórios de instalação
-    UPDATE=1
-    [ ! -d /opt/lunesnode ] && UPDATE=0
-    [ ! -d /etc/lunesnode ] && UPDATE=0
-    [ ! -f /etc/lunesnode/lunes.conf ] && UPDATE=0
-}
-
 my_ip () {
     IPV4=$(curl --silent https://checkip.amazonaws.com)
     FQDN=$(dig -x $IPV4 +short)
@@ -246,7 +254,7 @@ echo "                                             ";
 echo "                                             ";
 echo -e "\e[97m"
 echo " "
-echo " - Script de instalação/atualização do Lunes Node - Ubuntu 16.04"
+echo " - Script de instalação/atualização do Lunes Node - Ubuntu 18.04/16.04"
 echo " "
 echo " Este script irá realizar as seguintes configurações em seu node:"
 echo " "
@@ -278,19 +286,36 @@ step "Validando Root..."
 try is_root
 next
 
+# Atualizando pacotes
+step "Atualizando pacotes do Sistema Operacional..."
+try $PKG update &> /dev/null
+try $PKG -y upgrade &> /dev/null
+try $PKG -y install wget &> /dev/null
+try $PKG -y install git &> /dev/null
+next
+
 # Validando necessidade de atualizacao LunesNode
 step "Comparando MD5...."
 try md5_check
 next
 
 
-# Atualizando pacotes
-step "Atualizando pacotes do Sistema Operacional..."
-try $PKG update &> /dev/null
-try $PKG upgrade &> /dev/null
-try $PKG install wget &> /dev/null
-try $PKG install git &> /dev/null
-next
+# Verifica IP e node do Node
+my_ip
+echo ""
+echo ""
+echo "Dados encontrados: "
+echo "    NODE: " $NODE_NAME
+echo "    IPv4: " $IPV4
+echo ""
+read -p "Estes são os dados de seu node ? <S/n> " -n 1 -r
+if [[ ! $REPLY =~ ^[YySs]$ ]]
+then
+   echo "Corrija os dados de seu DNS e tente novamente :-) "
+   exit 1
+fi
+NODE_NAME_FINAL=$NODE_NAME
+IPV4_FINAL=$IPV4
 
 # Instalando dependencia
 step "Instalando OpenJDK8...."
@@ -299,8 +324,12 @@ if [[ $SO != "ubuntu" ]]; then
 else
     JRE=openjdk-8-jre
 fi
-try $PKG install $JRE &> /dev/null
+try $PKG -y install $JRE &> /dev/null
 next 
+
+step "Download binaries..."
+try download_git
+next
 
 # Criação do usuário lunesuser
 # Captura da Senha da Wallet"
@@ -322,17 +351,6 @@ done
 step "Criando usuário lunesuser....."
 try /usr/sbin/adduser lunesuser --gecos "Lunes User,,," --disabled-password &> /dev/null
 try echo "lunesuser:$LUNESUSER" | /usr/bin/sudo chpasswd
-next
-
-# Download dos pacotes do LunesNode
-cd /opt/lunesnode
-step "Baixando LunesNode....."
-try $WGET --no-cache "${lunesnode_url}/LunesNode/releases/download/0.0.7/lunesnode-latest.jar"  &> /dev/null
-next
-
-step "Baixando Wallet Generator...."
-cd /opt/lunesnode
-try $WGET --no-cache "${lunesnode_url}/WalletGenerator/releases/download/0.0.1/walletgenerator.jar"  &> /dev/null
 next
 
 # Criando o serviço
@@ -361,30 +379,12 @@ next
 
 step "Configurando /etc/lunesnode/lunes.conf...."
 mkdir /tmp/node
-cd /tmp/node
-try $WGET --no-cache "${lunesnode_git}/lunes_mainnet.conf"  &> /dev/null
+try cp lunes_mainnet.conf /tmp/node/lunes.conf
 next
 
-# Verifica IP e node do Node
-my_ip
-echo ""
-echo ""
-echo "Dados encontrados: "
-echo "    NODE: " $NODE_NAME
-echo "    IPv4: " $IPV4
-echo ""
-read -p "Estes são os dados de seu node ? <S/n> " -n 1 -r
-if [[ ! $REPLY =~ ^[YySs]$ ]]
-then
-    echo "Corrija os dados de seu DNS e tente novamente :-) "
-    exit 1
-fi
-NODE_NAME_FINAL=$NODE_NAME
-IPV4_FINAL=$IPV4
 echo ""
 echo ""
 step "Incluindo NODE_NAME no lunes.conf...."
-mv /tmp/node/lunes_mainnet.conf /tmp/node/lunes.conf
 try sed -i s/NODE_NAME/$NODE_NAME_FINAL/g /tmp/node/lunes.conf
 next
 
@@ -397,7 +397,7 @@ try sed -i "s/WALLET_PASS/$WALLET_PASS_FINAL/g" /tmp/node/lunes.conf
 next
 
 step "Incluindo seu SEED no lunes.conf ....."
-get_data seed_hash
+VALOR_FINAL=`grep "seed_hash" /tmp/wallet/SENHAS.TXT | awk  -F':' '{ print $2}' `
 try sed -i "s/WALLET_SEED/$VALOR_FINAL/g" /tmp/node/lunes.conf
 next
 mv /tmp/node/lunes.conf /etc/lunesnode/lunes.conf
